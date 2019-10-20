@@ -1,0 +1,10 @@
+version: '3'
+services:
+  go_rest_api: # service名
+    build: ./app
+    container_name: "go_rest_api"
+    tty: true
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./app:/go/src/app
