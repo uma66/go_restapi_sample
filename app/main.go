@@ -85,7 +85,7 @@ func handleRequests() {
 		fmt.Println("post_params1: ", param1)
 		fmt.Println("post_params2: ", param2)
 
-		// PostパラメータをPersonのstructにマッピング
+		// Postパラメータをstruct Personにマッピング
 		var person Person
 		err = decoder.Decode(&person, r.PostForm)
 		if err != nil {
@@ -93,7 +93,10 @@ func handleRequests() {
 		}
 
 	}).Methods(http.MethodPost)
-
+    
+    // Gorillaはnet/httpのラッパーで、net/httpはリクエスト毎に新しいgoroutineを開始し、ハンドラに処理を受け渡す。
+    // https://www.reddit.com/r/golang/comments/641z3b/is_gorilla_mux_router_or_the_http_package/
+    // https://stackoverflow.com/questions/49975616/golang-rest-api-concurrency
 	srv := &http.Server{
 		Addr:    "0.0.0.0:8000",
 		Handler: router, // Pass our instance of gorilla/mux in.
