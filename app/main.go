@@ -7,10 +7,45 @@ import (
 	"github.com/gorilla/schema"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
 var decoder = schema.NewDecoder()
+
+// enum
+// 参考: https://text.baldanders.info/golang/enumeration/
+type VideoType int
+
+const (
+	Unknown VideoType = iota
+	VideoA
+	VideoB
+	VideoC
+)
+
+var videoTypeMap = map[VideoType]string{
+	Unknown: "Unknown",
+	VideoA:  "VideoA",
+	VideoB:  "VideoB",
+	VideoC:  "VideoC",
+}
+
+func (v VideoType) String() string {
+	if s, ok := videoTypeMap[v]; ok {
+		return s
+	}
+	return "Unknown"
+}
+
+func GetVideoType(s string) VideoType {
+	for key, value := range videoTypeMap {
+		if strings.ToLower(value) == strings.ToLower(s) {
+			return key
+		}
+	}
+	return Unknown
+}
 
 type Person struct {
 	Name string
@@ -43,9 +78,7 @@ func handleRequests() {
 		vars := mux.Vars(r)
 		fmt.Println("requestParams: ", vars)
 
-		title := vars["title"]
-		videoType := vars["type"]
-		id := vars["id"]
+		title, videoType, id := vars["title"], vars["type"], vars["id"]
 
 		fmt.Println("log => ", [...]string{title, videoType, id})
 
@@ -93,10 +126,10 @@ func handleRequests() {
 		}
 
 	}).Methods(http.MethodPost)
-    
-    // Gorillaはnet/httpのラッパーで、net/httpはリクエスト毎に新しいgoroutineを開始し、ハンドラに処理を受け渡す。
-    // https://www.reddit.com/r/golang/comments/641z3b/is_gorilla_mux_router_or_the_http_package/
-    // https://stackoverflow.com/questions/49975616/golang-rest-api-concurrency
+
+	// Gorillaはnet/httpのラッパーで、net/httpはリクエスト毎に新しいgoroutineを開始し、ハンドラに処理を受け渡す。
+	// https://www.reddit.com/r/golang/comments/641z3b/is_gorilla_mux_router_or_the_http_package/
+	// https://stackoverflow.com/questions/49975616/golang-rest-api-concurrency
 	srv := &http.Server{
 		Addr:    "0.0.0.0:8000",
 		Handler: router, // Pass our instance of gorilla/mux in.
@@ -111,5 +144,10 @@ func handleRequests() {
 
 func main() {
 	fmt.Println("start api")
+
+	// stringから列挙型に変換
+	a := GetVideoType("VideoB")
+	fmt.Println("enum: ", a)
+
 	handleRequests()
 }
